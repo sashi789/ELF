@@ -1,144 +1,249 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { 
-  Box, 
-  Typography, 
-  Button, 
-  Card, 
-  CardContent, 
-  CardActions, 
+import React, { useState } from 'react';
+import {
+  Box,
+  Button,
+  Typography,
   Container,
   Paper,
-  Avatar
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
-import PersonIcon from '@mui/icons-material/Person';
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import GavelIcon from '@mui/icons-material/Gavel';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { LoginForm } from '../components/LoginForm';
 
-const LandingPage: React.FC = () => {
+export const LandingPage: React.FC = () => {
+  const [showLogin, setShowLogin] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const portals = [
-    {
-      title: 'Client Portal',
-      description: 'View your cases, track progress, and manage your legal matters.',
-      icon: <PersonIcon sx={{ fontSize: 60 }} />,
-      color: 'primary',
-      path: '/client',
-      features: ['View case status', 'Track progress', 'Upload documents', 'Contact attorney']
-    },
-    {
-      title: 'Attorney Portal',
-      description: 'Manage your cases, clients, and legal work efficiently.',
-      icon: <GavelIcon sx={{ fontSize: 60 }} />,
-      color: 'success' as const,
-      path: '/attorney',
-      features: ['Manage cases', 'Client communication', 'Document review', 'Task management']
-    },
-    {
-      title: 'Admin Portal',
-      description: 'System administration, user management, and overall system oversight.',
-      icon: <AdminPanelSettingsIcon sx={{ fontSize: 60 }} />,
-      color: 'error' as const,
-      path: '/admin',
-      features: ['User management', 'System settings', 'Case oversight', 'Analytics']
+  // If user is already authenticated, redirect to their dashboard
+  React.useEffect(() => {
+    if (user) {
+      const roleRedirects: Record<string, string> = {
+        client: '/client',
+        attorney: '/attorney',
+        admin: '/admin',
+      };
+      navigate(roleRedirects[user.role] || '/client');
     }
+  }, [user, navigate]);
+
+  const handleAuthSuccess = () => {
+    setShowLogin(false);
+    setShowRegister(false);
+  };
+
+  const openLogin = () => {
+    setAuthMode('login');
+    setShowLogin(true);
+  };
+
+  const openRegister = () => {
+    setAuthMode('register');
+    setShowRegister(true);
+  };
+
+  const userTypes = [
+    {
+      title: 'Client',
+      description: 'Track your case progress, view documents, and communicate with your legal team.',
+      features: ['Case tracking', 'Document access', 'Secure messaging', 'Progress updates'],
+      color: '#1976d2',
+    },
+    {
+      title: 'Attorney',
+      description: 'Manage your cases, review documents, and collaborate with clients and other attorneys.',
+      features: ['Case management', 'Document review', 'Client communication', 'Referral tracking'],
+      color: '#388e3c',
+    },
+    {
+      title: 'Admin',
+      description: 'Oversee the entire system, manage users, and ensure smooth operations.',
+      features: ['User management', 'System monitoring', 'Analytics dashboard', 'Configuration settings'],
+      color: '#d32f2f',
+    },
   ];
 
   return (
-    <Box sx={{ 
-      minHeight: '100vh', 
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      display: 'flex',
-      alignItems: 'center',
-      py: 4
-    }}>
-      <Container maxWidth="lg">
-        <Paper elevation={8} sx={{ p: 4, borderRadius: 3 }}>
-          <Box textAlign="center" mb={4}>
-            <Typography variant="h2" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+    <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
+      {/* Header */}
+      <Box sx={{ backgroundColor: 'white', boxShadow: 1, py: 2 }}>
+        <Container maxWidth="lg">
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Typography variant="h4" component="h1" color="primary" fontWeight="bold">
               ELF Automation
             </Typography>
-            <Typography variant="h5" color="text.secondary" gutterBottom>
-              Legal Case Management System
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Choose your portal to access the system
-            </Typography>
+            <Box>
+              <Button variant="outlined" onClick={openLogin} sx={{ mr: 2 }}>
+                Sign In
+              </Button>
+              <Button variant="contained" onClick={openRegister}>
+                Get Started
+              </Button>
+            </Box>
           </Box>
+        </Container>
+      </Box>
 
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'center' }}>
-            {portals.map((portal) => (
-              <Box key={portal.title} sx={{ width: { xs: '100%', md: '30%' }, minWidth: 300 }}>
-                <Card 
-                  sx={{ 
-                    height: '100%', 
-                    display: 'flex', 
-                    flexDirection: 'column',
-                    transition: 'transform 0.2s, box-shadow 0.2s',
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: 8
-                    }
-                  }}
-                >
-                  <CardContent sx={{ flexGrow: 1, textAlign: 'center' }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-                      <Avatar 
-                        sx={{ 
-                          width: 80, 
-                          height: 80, 
-                          bgcolor: `${portal.color}.main`,
-                          color: 'white'
-                        }}
+      {/* Hero Section */}
+      <Container maxWidth="lg" sx={{ py: 8 }}>
+        <Box textAlign="center" mb={8}>
+          <Typography variant="h2" component="h1" gutterBottom fontWeight="bold">
+            Streamline Your Legal Practice
+          </Typography>
+          <Typography variant="h5" color="text.secondary" paragraph>
+            AI-powered case management, automated document processing, and intelligent attorney matching
+          </Typography>
+          <Box mt={4}>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={openRegister}
+              sx={{ mr: 2, px: 4, py: 1.5 }}
+            >
+              Start Free Trial
+            </Button>
+            <Button
+              variant="outlined"
+              size="large"
+              onClick={openLogin}
+              sx={{ px: 4, py: 1.5 }}
+            >
+              Sign In
+            </Button>
+          </Box>
+        </Box>
+
+        {/* User Types */}
+        <Grid container spacing={4} sx={{ mb: 8 }}>
+          {userTypes.map((userType, index) => (
+            <Grid item xs={12} md={4} key={index}>
+              <Card
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  transition: 'transform 0.2s',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: 4,
+                  },
+                }}
+              >
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Typography
+                    variant="h5"
+                    component="h2"
+                    gutterBottom
+                    sx={{ color: userType.color, fontWeight: 'bold' }}
+                  >
+                    {userType.title}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" paragraph>
+                    {userType.description}
+                  </Typography>
+                  <Box component="ul" sx={{ pl: 2 }}>
+                    {userType.features.map((feature, featureIndex) => (
+                      <Typography
+                        key={featureIndex}
+                        component="li"
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mb: 0.5 }}
                       >
-                        {portal.icon}
-                      </Avatar>
-                    </Box>
-                    <Typography variant="h5" component="h2" gutterBottom>
-                      {portal.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" paragraph>
-                      {portal.description}
-                    </Typography>
-                    <Box sx={{ mt: 2 }}>
-                      {portal.features.map((feature, index) => (
-                        <Typography 
-                          key={index} 
-                          variant="body2" 
-                          color="text.secondary"
-                          sx={{ mb: 0.5 }}
-                        >
-                          • {feature}
-                        </Typography>
-                      ))}
-                    </Box>
-                  </CardContent>
-                  <CardActions sx={{ justifyContent: 'center', pb: 2 }}>
-                    <Button 
-                      variant="contained" 
-                      color={portal.color as any}
-                      size="large"
-                      onClick={() => navigate(portal.path)}
-                      sx={{ px: 4 }}
-                    >
-                      Enter Portal
-                    </Button>
-                  </CardActions>
-                </Card>
-              </Box>
-            ))}
-          </Box>
+                        {feature}
+                      </Typography>
+                    ))}
+                  </Box>
+                </CardContent>
+                <CardActions>
+                  <Button
+                    size="small"
+                    onClick={openRegister}
+                    sx={{ color: userType.color }}
+                  >
+                    Get Started
+                  </Button>
+                </CardActions>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
 
-          <Box textAlign="center" mt={4}>
-            <Typography variant="body2" color="text.secondary">
-              Need help? Contact system administrator
-            </Typography>
-          </Box>
+        {/* Features Section */}
+        <Paper sx={{ p: 4, mb: 8 }}>
+          <Typography variant="h4" component="h2" gutterBottom textAlign="center">
+            Key Features
+          </Typography>
+          <Grid container spacing={4} mt={2}>
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6" gutterBottom>
+                🤖 AI-Powered Document Processing
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Automatically extract, analyze, and organize legal documents using advanced OCR and AI.
+              </Typography>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6" gutterBottom>
+                📋 Intelligent Case Management
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Track case progress, manage deadlines, and maintain comprehensive case histories.
+              </Typography>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6" gutterBottom>
+                👥 Smart Attorney Matching
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Find the perfect attorney for each case using AI-driven matching algorithms.
+              </Typography>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6" gutterBottom>
+                🔒 Secure & Compliant
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                HIPAA, GDPR, and CCPA compliant with enterprise-grade security and encryption.
+              </Typography>
+            </Grid>
+          </Grid>
         </Paper>
       </Container>
+
+      {/* Login Dialog */}
+      <Dialog
+        open={showLogin}
+        onClose={() => setShowLogin(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogContent sx={{ p: 0 }}>
+          <LoginForm mode="login" onSuccess={handleAuthSuccess} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Register Dialog */}
+      <Dialog
+        open={showRegister}
+        onClose={() => setShowRegister(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogContent sx={{ p: 0 }}>
+          <LoginForm mode="register" onSuccess={handleAuthSuccess} />
+        </DialogContent>
+      </Dialog>
     </Box>
   );
-};
-
-export default LandingPage; 
+}; 
