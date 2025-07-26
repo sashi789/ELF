@@ -1,0 +1,67 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    container_name: elf_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: elfuser
+      POSTGRES_PASSWORD: elfpassword
+      POSTGRES_DB: elfdb
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  ai-service:
+    build: ../backend/ai-service
+    container_name: ai_service
+    depends_on:
+      - postgres
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=elfuser
+      - DB_PASSWORD=elfpassword
+      - DB_NAME=elfdb
+    ports:
+      - "8001:8000"
+
+  attorney-service:
+    build: ../backend/attorney-service
+    container_name: attorney_service
+    depends_on:
+      - postgres
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=elfuser
+      - DB_PASSWORD=elfpassword
+      - DB_NAME=elfdb
+    ports:
+      - "8002:8000"
+
+  case-service:
+    build: ../backend/case-service
+    container_name: case_service
+    depends_on:
+      - postgres
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=elfuser
+      - DB_PASSWORD=elfpassword
+      - DB_NAME=elfdb
+    ports:
+      - "3001:4000"
+
+  web-frontend:
+    build: ../frontend/web
+    container_name: web_frontend
+    depends_on:
+      - case-service
+    environment:
+      - VITE_API_URL=http://localhost:3001
+    ports:
+      - "5173:5173"
+volumes:
+  pgdata: 
