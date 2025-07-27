@@ -8,6 +8,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { LoginForm } from './components/LoginForm';
+import { AuthPage } from './pages/AuthPage';
 
 // Client-facing components
 import ClientLayout from './layouts/ClientLayout';
@@ -52,8 +53,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <Route path="/" element={<LandingPage />} />
             
             {/* Authentication routes */}
-            <Route path="/login" element={<LoginForm mode="login" />} />
-            <Route path="/register" element={<LoginForm mode="register" />} />
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/login" element={<Navigate to="/auth?mode=login" replace />} />
+            <Route path="/register" element={<Navigate to="/auth?mode=register" replace />} />
             
             {/* Client-facing routes */}
             <Route 

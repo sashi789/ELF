@@ -40,6 +40,8 @@ security = HTTPBearer()
 # Pydantic models
 class UserCreate(BaseModel):
     email: EmailStr
+    username: str
+    name: str
     password: str
     role: str  # 'client', 'attorney', 'admin'
 
@@ -50,6 +52,8 @@ class UserLogin(BaseModel):
 class UserResponse(BaseModel):
     user_id: str
     email: str
+    username: str
+    name: str
     role: str
     created_at: datetime
 
@@ -111,7 +115,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     try:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT user_id, email, role, created_at FROM users WHERE email = %s",
+                "SELECT user_id, email, username, name, role, created_at FROM users WHERE email = %s",
                 (token_data.email,)
             )
             user_data = cur.fetchone()
@@ -123,8 +127,10 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
             return UserResponse(
                 user_id=user_data[0],
                 email=user_data[1],
-                role=user_data[2],
-                created_at=user_data[3]
+                username=user_data[2],
+                name=user_data[3],
+                role=user_data[4],
+                created_at=user_data[5]
             )
     finally:
         conn.close()
@@ -158,6 +164,14 @@ async def register_user(user: UserCreate):
                     detail="Email already registered"
                 )
             
+            # Check if username already exists
+            cur.execute("SELECT user_id FROM users WHERE username = %s", (user.username,))
+            if cur.fetchone():
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Username already taken"
+                )
+            
             # Validate role
             if user.role not in ['client', 'attorney', 'admin']:
                 raise HTTPException(
@@ -168,8 +182,8 @@ async def register_user(user: UserCreate):
             # Create user
             hashed_password = get_password_hash(user.password)
             cur.execute(
-                "INSERT INTO users (email, password_hash, role) VALUES (%s, %s, %s) RETURNING user_id, created_at",
-                (user.email, hashed_password, user.role)
+                "INSERT INTO users (email, username, name, password_hash, role) VALUES (%s, %s, %s, %s, %s) RETURNING user_id, created_at",
+                (user.email, user.username, user.name, hashed_password, user.role)
             )
             user_id, created_at = cur.fetchone()
             conn.commit()
@@ -187,6 +201,8 @@ async def register_user(user: UserCreate):
                 user=UserResponse(
                     user_id=user_id,
                     email=user.email,
+                    username=user.username,
+                    name=user.name,
                     role=user.role,
                     created_at=created_at
                 )
@@ -208,12 +224,12 @@ async def login_user(user_credentials: UserLogin):
     try:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT user_id, email, password_hash, role, created_at FROM users WHERE email = %s",
+                "SELECT user_id, email, username, name, password_hash, role, created_at FROM users WHERE email = %s",
                 (user_credentials.email,)
             )
             user_data = cur.fetchone()
             
-            if not user_data or not verify_password(user_credentials.password, user_data[2]):
+            if not user_data or not verify_password(user_credentials.password, user_data[4]):
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Incorrect email or password"
@@ -222,7 +238,7 @@ async def login_user(user_credentials: UserLogin):
             # Create access token
             access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
             access_token = create_access_token(
-                data={"sub": user_data[1], "role": user_data[3]},
+                data={"sub": user_data[1], "role": user_data[5]},
                 expires_delta=access_token_expires
             )
             
@@ -232,8 +248,10 @@ async def login_user(user_credentials: UserLogin):
                 user=UserResponse(
                     user_id=user_data[0],
                     email=user_data[1],
-                    role=user_data[3],
-                    created_at=user_data[4]
+                    username=user_data[2],
+                    name=user_data[3],
+                    role=user_data[5],
+                    created_at=user_data[6]
                 )
             )
     finally:

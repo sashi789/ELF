@@ -18,9 +18,11 @@ import PersonIcon from '@mui/icons-material/Person';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 const ClientDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // Mock data - in real app this would come from API
   const clientStats = {
@@ -45,11 +47,54 @@ const ClientDashboard: React.FC = () => {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        Welcome back, Client
+        Welcome back, {user?.name || 'Client'}
       </Typography>
       <Typography variant="body1" color="text.secondary" mb={4}>
         Here's an overview of your legal matters
       </Typography>
+
+      {/* User Info Card */}
+      <Card sx={{ mb: 4 }}>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>
+            Your Account Information
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                Name
+              </Typography>
+              <Typography variant="body1">
+                {user?.name || 'Not available'}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                Username
+              </Typography>
+              <Typography variant="body1">
+                {user?.username || 'Not available'}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                Email
+              </Typography>
+              <Typography variant="body1">
+                {user?.email || 'Not available'}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                Role
+              </Typography>
+              <Typography variant="body1" sx={{ textTransform: 'capitalize' }}>
+                {user?.role || 'Not available'}
+              </Typography>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
 
       {/* Stats Cards */}
       <Box sx={{ display: 'flex', gap: 3, mb: 4, flexWrap: 'wrap' }}>

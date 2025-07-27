@@ -8,24 +8,48 @@ import {
   Button, 
   Avatar,
   Divider,
-  Alert
+  Alert,
+  Chip
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import { useAuth } from '../../contexts/AuthContext';
 
 const ClientProfile: React.FC = () => {
+  const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  
+  // Parse the user's name into first and last name
+  const nameParts = user?.name ? user.name.split(' ') : ['', ''];
+  const firstName = nameParts[0] || '';
+  const lastName = nameParts.slice(1).join(' ') || '';
+  
   const [formData, setFormData] = useState({
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    phone: '+1 (555) 123-4567',
-    address: '123 Main St, City, State 12345',
-    emergencyContact: 'Jane Doe',
-    emergencyPhone: '+1 (555) 987-6543'
+    firstName: firstName,
+    lastName: lastName,
+    email: user?.email || '',
+    phone: '+1 (555) 123-4567', // Default phone, can be updated later
+    address: '123 Main St, City, State 12345', // Default address, can be updated later
+    emergencyContact: 'Emergency Contact', // Default, can be updated later
+    emergencyPhone: '+1 (555) 987-6543' // Default, can be updated later
   });
+
+  // Update form data when user changes
+  React.useEffect(() => {
+    const nameParts = user?.name ? user.name.split(' ') : ['', ''];
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+    
+    setFormData(prev => ({
+      ...prev,
+      firstName: firstName,
+      lastName: lastName,
+      email: user?.email || prev.email
+    }));
+  }, [user]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -39,19 +63,39 @@ const ClientProfile: React.FC = () => {
     setIsEditing(false);
   };
 
+  const handleCopyClientId = () => {
+    if (user?.user_id) {
+      navigator.clipboard.writeText(user.user_id);
+    }
+  };
+
   const handleCancel = () => {
     setIsEditing(false);
-    // Reset form data to original values
-    setFormData({
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john.doe@example.com',
-      phone: '+1 (555) 123-4567',
-      address: '123 Main St, City, State 12345',
-      emergencyContact: 'Jane Doe',
-      emergencyPhone: '+1 (555) 987-6543'
-    });
+    // Reset form data to current user values
+    const nameParts = user?.name ? user.name.split(' ') : ['', ''];
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+    
+    setFormData(prev => ({
+      ...prev,
+      firstName: firstName,
+      lastName: lastName,
+      email: user?.email || prev.email
+    }));
   };
+
+  if (!user) {
+    return (
+      <Box>
+        <Typography variant="h4" gutterBottom>
+          My Profile
+        </Typography>
+        <Alert severity="warning">
+          Please log in to view your profile.
+        </Alert>
+      </Box>
+    );
+  }
 
   return (
     <Box>
@@ -80,11 +124,34 @@ const ClientProfile: React.FC = () => {
             </Avatar>
             <Box>
               <Typography variant="h6">
-                {formData.firstName} {formData.lastName}
+                {user.name || `${formData.firstName} ${formData.lastName}`}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Client ID: CL-{Math.random().toString(36).substr(2, 8).toUpperCase()}
+                Username: {user.username}
               </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Client ID:
+                </Typography>
+                <Chip
+                  label={user.user_id}
+                  size="small"
+                  variant="outlined"
+                  sx={{ 
+                    fontFamily: 'monospace',
+                    fontSize: '0.8rem'
+                  }}
+                />
+                <Button
+                  startIcon={<ContentCopyIcon />}
+                  onClick={handleCopyClientId}
+                  size="small"
+                  variant="outlined"
+                  sx={{ minWidth: 'auto', px: 1 }}
+                >
+                  Copy
+                </Button>
+              </Box>
             </Box>
           </Box>
 

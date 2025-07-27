@@ -9,6 +9,7 @@ A full-stack legal-tech AI-driven referral and case management platform for auto
 - Human-in-the-loop quality control
 - Full case lifecycle tracking
 - Role-based dashboards for clients, staff, and attorneys
+- Client ID generation and display for customer reference
 
 ## Tech Stack
 - **Backend:** Node.js (TypeScript), Python (FastAPI), PostgreSQL, Redis, RabbitMQ/Kafka, Elasticsearch, AWS S3

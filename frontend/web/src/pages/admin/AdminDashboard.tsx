@@ -19,9 +19,11 @@ import PersonIcon from '@mui/icons-material/Person';
 import EventIcon from '@mui/icons-material/Event';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // Mock data - in real app this would come from API
   const systemStats = {
@@ -55,8 +57,51 @@ const AdminDashboard: React.FC = () => {
         Admin Dashboard
       </Typography>
       <Typography variant="body1" color="text.secondary" mb={4}>
-        System overview and management tools
+        Welcome back, {user?.name || 'Admin'}. System overview and management tools
       </Typography>
+
+      {/* User Info Card */}
+      <Card sx={{ mb: 4 }}>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>
+            Your Account Information
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                Name
+              </Typography>
+              <Typography variant="body1">
+                {user?.name || 'Not available'}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                Username
+              </Typography>
+              <Typography variant="body1">
+                {user?.username || 'Not available'}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                Email
+              </Typography>
+              <Typography variant="body1">
+                {user?.email || 'Not available'}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                Role
+              </Typography>
+              <Typography variant="body1" sx={{ textTransform: 'capitalize' }}>
+                {user?.role || 'Not available'}
+              </Typography>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
 
       {/* Stats Cards */}
       <Box sx={{ display: 'flex', gap: 3, mb: 4, flexWrap: 'wrap' }}>

@@ -3,6 +3,8 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 interface User {
   user_id: string;
   email: string;
+  username: string;
+  name: string;
   role: 'client' | 'attorney' | 'admin';
   created_at: string;
 }
@@ -11,7 +13,7 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, role: 'client' | 'attorney' | 'admin') => Promise<void>;
+  register: (email: string, username: string, name: string, password: string, confirmPassword: string, role: 'client' | 'attorney' | 'admin') => Promise<void>;
   logout: () => void;
   isLoading: boolean;
   error: string | null;
@@ -23,7 +25,7 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-const AUTH_SERVICE_URL = import.meta.env.VITE_AUTH_SERVICE_URL || 'http://localhost:5000';
+const AUTH_SERVICE_URL = import.meta.env.VITE_AUTH_SERVICE_URL || 'http://localhost:8000';
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -93,9 +95,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const register = async (email: string, password: string, role: 'client' | 'attorney' | 'admin') => {
+  const register = async (email: string, username: string, name: string, password: string, confirmPassword: string, role: 'client' | 'attorney' | 'admin') => {
     setIsLoading(true);
     setError(null);
+
+    // Validate password confirmation
+    if (password !== confirmPassword) {
+      const error = new Error('Passwords do not match');
+      setError(error.message);
+      setIsLoading(false);
+      throw error;
+    }
 
     try {
       const response = await fetch(`${AUTH_SERVICE_URL}/register`, {
@@ -103,7 +113,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password, role }),
+        body: JSON.stringify({ email, username, name, password, role }),
       });
 
       if (response.ok) {

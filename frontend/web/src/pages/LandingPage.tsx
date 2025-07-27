@@ -19,8 +19,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { LoginForm } from '../components/LoginForm';
 
 export const LandingPage: React.FC = () => {
-  const [showLogin, setShowLogin] = useState(false);
-  const [showRegister, setShowRegister] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -38,18 +37,12 @@ export const LandingPage: React.FC = () => {
   }, [user, navigate]);
 
   const handleAuthSuccess = () => {
-    setShowLogin(false);
-    setShowRegister(false);
+    setShowAuth(false);
   };
 
-  const openLogin = () => {
-    setAuthMode('login');
-    setShowLogin(true);
-  };
-
-  const openRegister = () => {
-    setAuthMode('register');
-    setShowRegister(true);
+  const openAuth = (mode: 'login' | 'register') => {
+    setAuthMode(mode);
+    setShowAuth(true);
   };
 
   const userTypes = [
@@ -83,11 +76,11 @@ export const LandingPage: React.FC = () => {
               ELF Automation
             </Typography>
             <Box>
-              <Button variant="outlined" onClick={openLogin} sx={{ mr: 2 }}>
+              <Button variant="outlined" onClick={() => openAuth('login')} sx={{ mr: 2 }}>
                 Sign In
               </Button>
-              <Button variant="contained" onClick={openRegister}>
-                Get Started
+              <Button variant="contained" onClick={() => openAuth('register')}>
+                Sign Up
               </Button>
             </Box>
           </Box>
@@ -107,7 +100,7 @@ export const LandingPage: React.FC = () => {
             <Button
               variant="contained"
               size="large"
-              onClick={openRegister}
+              onClick={() => openAuth('register')}
               sx={{ mr: 2, px: 4, py: 1.5 }}
             >
               Start Free Trial
@@ -115,7 +108,7 @@ export const LandingPage: React.FC = () => {
             <Button
               variant="outlined"
               size="large"
-              onClick={openLogin}
+              onClick={() => openAuth('login')}
               sx={{ px: 4, py: 1.5 }}
             >
               Sign In
@@ -126,7 +119,7 @@ export const LandingPage: React.FC = () => {
         {/* User Types */}
         <Grid container spacing={4} sx={{ mb: 8 }}>
           {userTypes.map((userType, index) => (
-            <Grid item xs={12} md={4} key={index}>
+            <Grid xs={12} md={4} key={index}>
               <Card
                 sx={{
                   height: '100%',
@@ -165,13 +158,21 @@ export const LandingPage: React.FC = () => {
                     ))}
                   </Box>
                 </CardContent>
-                <CardActions>
+                <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
                   <Button
                     size="small"
-                    onClick={openRegister}
+                    onClick={() => openAuth('register')}
                     sx={{ color: userType.color }}
                   >
-                    Get Started
+                    Sign Up
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => openAuth('login')}
+                    sx={{ color: userType.color }}
+                  >
+                    Sign In
                   </Button>
                 </CardActions>
               </Card>
@@ -185,63 +186,51 @@ export const LandingPage: React.FC = () => {
             Key Features
           </Typography>
           <Grid container spacing={4} mt={2}>
-            <Grid item xs={12} md={6}>
-              <Typography variant="h6" gutterBottom>
-                🤖 AI-Powered Document Processing
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Automatically extract, analyze, and organize legal documents using advanced OCR and AI.
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="h6" gutterBottom>
-                📋 Intelligent Case Management
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Track case progress, manage deadlines, and maintain comprehensive case histories.
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="h6" gutterBottom>
-                👥 Smart Attorney Matching
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Find the perfect attorney for each case using AI-driven matching algorithms.
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="h6" gutterBottom>
-                🔒 Secure & Compliant
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                HIPAA, GDPR, and CCPA compliant with enterprise-grade security and encryption.
-              </Typography>
-            </Grid>
+                      <Grid xs={12} md={6}>
+            <Typography variant="h6" gutterBottom>
+              🤖 AI-Powered Document Processing
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Automatically extract, analyze, and organize legal documents using advanced OCR and AI.
+            </Typography>
+          </Grid>
+          <Grid xs={12} md={6}>
+            <Typography variant="h6" gutterBottom>
+              📋 Intelligent Case Management
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Track case progress, manage deadlines, and maintain comprehensive case histories.
+            </Typography>
+          </Grid>
+          <Grid xs={12} md={6}>
+            <Typography variant="h6" gutterBottom>
+              👥 Smart Attorney Matching
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Find the perfect attorney for each case using AI-driven matching algorithms.
+            </Typography>
+          </Grid>
+          <Grid xs={12} md={6}>
+            <Typography variant="h6" gutterBottom>
+              🔒 Secure & Compliant
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              HIPAA, GDPR, and CCPA compliant with enterprise-grade security and encryption.
+            </Typography>
+          </Grid>
           </Grid>
         </Paper>
       </Container>
 
-      {/* Login Dialog */}
+      {/* Auth Dialog */}
       <Dialog
-        open={showLogin}
-        onClose={() => setShowLogin(false)}
+        open={showAuth}
+        onClose={() => setShowAuth(false)}
         maxWidth="sm"
         fullWidth
       >
         <DialogContent sx={{ p: 0 }}>
-          <LoginForm mode="login" onSuccess={handleAuthSuccess} />
-        </DialogContent>
-      </Dialog>
-
-      {/* Register Dialog */}
-      <Dialog
-        open={showRegister}
-        onClose={() => setShowRegister(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogContent sx={{ p: 0 }}>
-          <LoginForm mode="register" onSuccess={handleAuthSuccess} />
+          <LoginForm mode={authMode} onSuccess={handleAuthSuccess} />
         </DialogContent>
       </Dialog>
     </Box>

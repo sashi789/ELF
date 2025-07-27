@@ -4,29 +4,32 @@ import {
   Typography, 
   Card, 
   CardContent, 
+  Grid, 
   Button, 
+  Chip,
   List,
   ListItem,
   ListItemText,
   ListItemIcon,
-  Divider,
-  Chip
+  Divider
 } from '@mui/material';
-import DashboardIcon from '@mui/icons-material/Dashboard';
 import FolderIcon from '@mui/icons-material/Folder';
 import PeopleIcon from '@mui/icons-material/People';
 import EventIcon from '@mui/icons-material/Event';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 const AttorneyDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // Mock data - in real app this would come from API
   const attorneyStats = {
-    totalCases: 15,
+    totalCases: 12,
     activeCases: 8,
-    totalClients: 12,
+    totalClients: 15,
     pendingTasks: 5,
     upcomingDeadlines: 3,
     recentUpdates: 4
@@ -58,8 +61,51 @@ const AttorneyDashboard: React.FC = () => {
         Attorney Dashboard
       </Typography>
       <Typography variant="body1" color="text.secondary" mb={4}>
-        Welcome back, Attorney. Here's your case overview and upcoming tasks.
+        Welcome back, {user?.name || 'Attorney'}. Here's your case overview and upcoming tasks.
       </Typography>
+
+      {/* User Info Card */}
+      <Card sx={{ mb: 4 }}>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>
+            Your Account Information
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                Name
+              </Typography>
+              <Typography variant="body1">
+                {user?.name || 'Not available'}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                Username
+              </Typography>
+              <Typography variant="body1">
+                {user?.username || 'Not available'}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                Email
+              </Typography>
+              <Typography variant="body1">
+                {user?.email || 'Not available'}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                Role
+              </Typography>
+              <Typography variant="body1" sx={{ textTransform: 'capitalize' }}>
+                {user?.role || 'Not available'}
+              </Typography>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
 
       {/* Stats Cards */}
       <Box sx={{ display: 'flex', gap: 3, mb: 4, flexWrap: 'wrap' }}>

@@ -30,12 +30,12 @@ const ClientLayout: React.FC = () => {
       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <Typography variant="h6" noWrap component="div">
-            ELF Automation - Client Portal
+            ELF Automation - {user?.name || 'Client'} Portal
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Chip 
-              avatar={<Avatar sx={{ width: 24, height: 24 }}>{user?.email?.charAt(0).toUpperCase() || 'C'}</Avatar>}
-              label={user?.email || 'Client'}
+              avatar={<Avatar sx={{ width: 24, height: 24 }}>{user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'C'}</Avatar>}
+              label={user?.name || user?.email || 'Client'}
               color="primary"
               variant="outlined"
             />

@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: elf_postgres
+    environment:
+      POSTGRES_DB: elf_automation
+      POSTGRES_USER: elf_user
+      POSTGRES_PASSWORD: elf_password
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/shared/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./backend/shared/migration_add_username_name.sql:/docker-entrypoint-initdb.d/02-migration.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U elf_user -d elf_automation"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: elf_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@elf.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+volumes:
+  postgres_data:
+  pgadmin_data: 
